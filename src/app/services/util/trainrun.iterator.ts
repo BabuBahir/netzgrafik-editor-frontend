@@ -294,6 +294,12 @@ export class TrainrunIterator {
   public hasNext(): boolean {
     return this.pointerElement.trainrunSection !== undefined;
   }
+
+  *[Symbol.iterator](): Generator<TrainrunSectionNodePair> {
+    while (this.hasNext()) {
+      yield this.next();
+    }
+  }
 }
 
 export class BackwardTrainrunIterator extends TrainrunIterator {

@@ -7,7 +7,11 @@ import {ResourceService} from "../app/services/data/resource.service";
 import {LogService} from "../app/logger/log.service";
 import {LogPublishersService} from "../app/logger/log.publishers.service";
 import {NetzgrafikUnitTesting} from "./netzgrafik.unit.testing";
-import {NonStopTrainrunIterator, TrainrunIterator} from "../app/services/util/trainrun.iterator";
+import {
+  BackwardTrainrunIterator,
+  NonStopTrainrunIterator,
+  TrainrunIterator,
+} from "../app/services/util/trainrun.iterator";
 import {NoteService} from "../app/services/data/note.service";
 import {LabelGroupService} from "../app/services/data/labelgroup.service";
 import {LabelService} from "../app/services/data/label.service";
@@ -157,5 +161,116 @@ describe("TrainrunSection Service Test", () => {
     }
     expect(itr.current().node.getId()).toBe(2);
     expect(iteratorNodeIds.length).toBe(0);
+  });
+
+  it("test for...of on trainrun iterator", () => {
+    dataService.loadNetzgrafikDto(NetzgrafikUnitTesting.getUnitTestNetzgrafik());
+
+    const startingTrainrunSection = trainrunSectionService
+      .getAllTrainrunSectionsForTrainrun(2)
+      .pop();
+    const node1 = trainrunService.getEndNode(
+      startingTrainrunSection.getSourceNode(),
+      startingTrainrunSection,
+    );
+
+    const itr = new TrainrunIterator(
+      logService,
+      node1,
+      node1.getTrainrunSection(startingTrainrunSection.getTrainrun()),
+    );
+    const iteratorNodeIds = [];
+    for (const pair of itr) {
+      iteratorNodeIds.push(pair.node.getId());
+    }
+    expect(iteratorNodeIds).toEqual([2, 1, 0]);
+    expect(itr.hasNext()).toBe(false);
+    expect(itr.current().node.getId()).toBe(0);
+  });
+
+  it("test spread on trainrun iterator", () => {
+    dataService.loadNetzgrafikDto(NetzgrafikUnitTesting.getUnitTestNetzgrafik());
+
+    const startingTrainrunSection = trainrunSectionService
+      .getAllTrainrunSectionsForTrainrun(2)
+      .pop();
+    const node1 = trainrunService.getEndNode(
+      startingTrainrunSection.getSourceNode(),
+      startingTrainrunSection,
+    );
+
+    const itr = new TrainrunIterator(
+      logService,
+      node1,
+      node1.getTrainrunSection(startingTrainrunSection.getTrainrun()),
+    );
+    const iteratorNodeIds = [...itr].map((pair) => pair.node.getId());
+    expect(iteratorNodeIds).toEqual([2, 1, 0]);
+  });
+
+  it("test Array.from on trainrun iterator", () => {
+    dataService.loadNetzgrafikDto(NetzgrafikUnitTesting.getUnitTestNetzgrafik());
+
+    const startingTrainrunSection = trainrunSectionService
+      .getAllTrainrunSectionsForTrainrun(2)
+      .pop();
+    const node1 = trainrunService.getEndNode(
+      startingTrainrunSection.getSourceNode(),
+      startingTrainrunSection,
+    );
+
+    const itr = new TrainrunIterator(
+      logService,
+      node1,
+      node1.getTrainrunSection(startingTrainrunSection.getTrainrun()),
+    );
+    const iteratorNodeIds = Array.from(itr, (pair) => pair.node.getId());
+    expect(iteratorNodeIds).toEqual([2, 1, 0]);
+  });
+
+  it("test for...of on backward trainrun iterator", () => {
+    dataService.loadNetzgrafikDto(NetzgrafikUnitTesting.getUnitTestNetzgrafik());
+
+    const startingTrainrunSection = trainrunSectionService
+      .getAllTrainrunSectionsForTrainrun(2)
+      .pop();
+    const node2 = trainrunService.getEndNode(
+      startingTrainrunSection.getTargetNode(),
+      startingTrainrunSection,
+    );
+
+    const itr = new BackwardTrainrunIterator(
+      logService,
+      node2,
+      node2.getTrainrunSection(startingTrainrunSection.getTrainrun()),
+    );
+    const iteratorNodeIds = [];
+    for (const pair of itr) {
+      iteratorNodeIds.push(pair.node.getId());
+    }
+    expect(iteratorNodeIds).toEqual([1, 2, 3]);
+  });
+
+  it("test for...of on non-stop trainrun iterator", () => {
+    dataService.loadNetzgrafikDto(NetzgrafikUnitTesting.getUnitTestNetzgrafik());
+
+    const startingTrainrunSection = trainrunSectionService
+      .getAllTrainrunSectionsForTrainrun(2)
+      .pop();
+    const node2 = trainrunService.getEndNode(
+      startingTrainrunSection.getTargetNode(),
+      startingTrainrunSection,
+    );
+
+    const itr = new NonStopTrainrunIterator(
+      logService,
+      node2,
+      node2.getTrainrunSection(startingTrainrunSection.getTrainrun()),
+    );
+    const iteratorNodeIds = [];
+    for (const pair of itr) {
+      iteratorNodeIds.push(pair.node.getId());
+    }
+    expect(iteratorNodeIds).toEqual([1, 2]);
   });
 });
