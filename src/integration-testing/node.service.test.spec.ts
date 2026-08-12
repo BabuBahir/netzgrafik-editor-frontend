@@ -672,7 +672,6 @@ describe("NodeService Test", () => {
     expect(trainrunSections.length).toBe(8);
     const con = nodeService.getNodeFromId(2).getConnectionFromId(1);
     expect(con.getDto().id).toBe(1);
-    expect(con.getPath().length).toBe(4);
   });
 
   it("remove connection test", () => {

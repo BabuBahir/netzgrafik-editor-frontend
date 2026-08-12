@@ -1,9 +1,12 @@
 import {Connection} from "../../../models/connection.model";
 import {Node} from "../../../models/node.model";
+import {SimpleTrainrunSectionRouter} from "../../../services/util/trainrunsection.routing";
+import {Vec2D} from "../../../utils/vec2D";
 import {EditorView} from "./editor.view";
 
 export class ConnectionsViewObject {
   key: string;
+  readonly path: Vec2D[];
 
   constructor(
     private editorView: EditorView,
@@ -12,11 +15,21 @@ export class ConnectionsViewObject {
     displayConnectionPin1: boolean,
     displayConnectionPin2: boolean,
   ) {
+    this.path = ConnectionsViewObject.computePath(connection, node);
     this.key = ConnectionsViewObject.generateKey(
       editorView,
       connection,
       displayConnectionPin1,
       displayConnectionPin2,
+      this.path,
+    );
+  }
+
+  static computePath(connection: Connection, node: Node): Vec2D[] {
+    return SimpleTrainrunSectionRouter.routeConnection(
+      node,
+      node.getPort(connection.getPortId1()),
+      node.getPort(connection.getPortId2()),
     );
   }
 
@@ -25,6 +38,7 @@ export class ConnectionsViewObject {
     connection: Connection,
     displayConnectionPin1: boolean,
     displayConnectionPin2: boolean,
+    path: Vec2D[],
   ): string {
     let key =
       "#" +
@@ -38,13 +52,13 @@ export class ConnectionsViewObject {
       "_" +
       connection.selected() +
       "_" +
-      connection.getPath()[0] +
+      path[0] +
       "_" +
-      connection.getPath()[1] +
+      path[1] +
       "_" +
-      connection.getPath()[2] +
+      path[2] +
       "_" +
-      connection.getPath()[3] +
+      path[3] +
       "_" +
       displayConnectionPin1 +
       "_" +
@@ -56,7 +70,7 @@ export class ConnectionsViewObject {
       "_" +
       editorView.trainrunSectionPreviewLineView.getVariantIsWritable();
 
-    connection.getPath().forEach((p) => {
+    path.forEach((p) => {
       key += p.toString();
     });
     return key;

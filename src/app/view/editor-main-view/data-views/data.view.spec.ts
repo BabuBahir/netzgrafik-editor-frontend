@@ -197,6 +197,15 @@ describe("Editor-DataView", () => {
     );
   });
 
+  it("ConnectionsViewObject  - 002", () => {
+    dataService.loadNetzgrafikDto(NetzgrafikUnitTesting.getUnitTestNetzgrafik());
+    const node = nodeService.getNodeFromId(2);
+    const con = node.getConnectionFromId(2);
+
+    const cvo = new ConnectionsViewObject(editorView, con, node, false, false);
+    expect(cvo.path.length).toBe(4);
+  });
+
   it("NodeViewObject   - 001", () => {
     dataService.loadNetzgrafikDto(NetzgrafikUnitTesting.getUnitTestNetzgrafik());
     const node = nodeService.getNodeFromId(2);

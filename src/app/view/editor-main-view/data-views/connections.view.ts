@@ -132,9 +132,7 @@ export class ConnectionsView {
     drawingGroup
       .append(StaticDomTags.CONNECTION_LINE_SVG)
       .attr("class", StaticDomTags.CONNECTION_LINE_CLASS)
-      .attr("d", (c: ConnectionsViewObject) =>
-        D3Utils.getBezierCurveAsSVGString(c.connection.getPath()),
-      )
+      .attr("d", (c: ConnectionsViewObject) => D3Utils.getBezierCurveAsSVGString(c.path))
       .attr(StaticDomTags.CONNECTION_ID, (c: ConnectionsViewObject) => c.connection.getId())
       .classed(StaticDomTags.TAG_WARNING, (c: ConnectionsViewObject) => c.connection.hasWarning())
       .classed(
@@ -255,15 +253,16 @@ export class ConnectionsView {
   }
 
   displayConnections(inputConnections: Connection[]) {
-    const connections = inputConnections.filter(
-      (c) =>
-        this.editorView.doCullCheckPositionsInViewport(c.getPath()) &&
-        this.filterConnectionsToDisplay(c),
+    const connectionsViewObjects = this.createTransitionViewObjects(inputConnections);
+    const connections = connectionsViewObjects.filter(
+      (cv: ConnectionsViewObject) =>
+        this.editorView.doCullCheckPositionsInViewport(cv.path) &&
+        this.filterConnectionsToDisplay(cv.connection),
     );
 
     const connectionsGroup = this.connectionsGroup
       .selectAll(StaticDomTags.CONNECTION_ROOT_CONTAINER_DOM_REF)
-      .data(this.createTransitionViewObjects(connections), (c: ConnectionsViewObject) => c.key);
+      .data(connections, (c: ConnectionsViewObject) => c.key);
 
     const grpEnter = connectionsGroup
       .enter()
